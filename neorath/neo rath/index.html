@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliCharge - Smart EV Charging Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-bolt"></i>
+                <h1>IntelliCharge</h1>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </button>
+                <button class="nav-btn" data-section="stations">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Stations
+                </button>
+                <button class="nav-btn" data-section="bookings">
+                    <i class="fas fa-calendar-check"></i>
+                    Bookings
+                </button>
+            </nav>
+            <div class="user-info">
+                <div class="location-info">
+                    <i class="fas fa-location-dot"></i>
+                    <span id="current-location">Detecting location...</span>
+                </div>
+                <button class="profile-btn">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+                <div class="demo-controls">
+                    <button class="btn btn-primary" onclick="testBookingModal()">Test Booking Modal</button>
+                    <button class="btn btn-secondary" onclick="testBatteryDrain()">Drain Battery</button>
+                    <button class="btn btn-secondary" onclick="testBatteryCharge()">Charge Battery</button>
+                    <select class="btn btn-secondary" onchange="testBatteryEfficiency(this.value)">
+                        <option value="normal">Normal Mode</option>
+                        <option value="city">City Driving</option>
+                        <option value="highway">Highway Driving</option>
+                        <option value="eco">Eco Mode</option>
+                    </select>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <!-- Battery Sustainability Gauge -->
+                <div class="battery-gauge-card">
+                    <div class="gauge-header">
+                        <h3>Battery Status</h3>
+                        <i class="fas fa-car-battery"></i>
+                    </div>
+                    <div class="gauge-container">
+                        <div class="circular-progress">
+                            <div class="progress-ring">
+                                <svg class="progress-ring-svg" width="120" height="120">
+                                    <circle class="progress-ring-circle-bg" cx="60" cy="60" r="54" stroke-width="8"></circle>
+                                    <circle class="progress-ring-circle" cx="60" cy="60" r="54" stroke-width="8"></circle>
+                                </svg>
+                                <div class="progress-content">
+                                    <span class="battery-percentage" id="battery-percentage">75%</span>
+                                    <span class="battery-status" id="battery-status">Good</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="battery-details">
+                            <div class="range-info">
+                                <span class="range-label">Estimated Range:</span>
+                                <span class="range-value" id="estimated-range">225 km</span>
+                            </div>
+                            <div class="capacity-info">
+                                <span class="capacity-label">Capacity:</span>
+                                <span class="capacity-value" id="battery-capacity">75 kWh</span>
+                            </div>
+                            <div class="efficiency-info">
+                                <span class="efficiency-label">Efficiency:</span>
+                                <span class="efficiency-value" id="battery-efficiency">6.0 km/kWh</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="range-warning" id="range-warning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Warning: Insufficient range to reach nearest station!</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-charging-station"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-stations">0</h3>
+                        <p>Total Stations</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="fast-chargers">0</h3>
+                        <p>Fast Chargers</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="free-stations">0</h3>
+                        <p>Free Stations</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <button class="control-btn" id="locate-me">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                    <button class="control-btn" id="refresh-stations">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stations Section -->
+        <section id="stations" class="section">
+            <div class="section-header">
+                <h2>Charging Stations</h2>
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="fast">Fast Chargers</button>
+                    <button class="filter-btn" data-filter="normal">Normal Chargers</button>
+                    <button class="filter-btn" data-filter="free">Free Stations</button>
+                </div>
+            </div>
+            <div class="stations-grid" id="stations-grid">
+                <!-- Stations will be populated here -->
+            </div>
+        </section>
+
+        <!-- Bookings Section -->
+        <section id="bookings" class="section">
+            <div class="section-header">
+                <h2>My Bookings</h2>
+                <button class="new-booking-btn">
+                    <i class="fas fa-plus"></i>
+                    New Booking
+                </button>
+            </div>
+            <div class="bookings-list" id="bookings-list">
+                <!-- Bookings will be populated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Station Info Panel -->
+    <div class="station-panel" id="station-panel">
+        <div class="panel-header">
+            <h3 id="station-name">Station Name</h3>
+            <button class="close-panel" id="close-panel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content">
+            <div class="station-details">
+                <div class="detail-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="station-address">Address</span>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-ruler"></i>
+                    <span id="station-distance">Distance</span>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-bolt"></i>
+                    <span id="station-type">Charger Type</span>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span id="station-price">Price</span>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-circle"></i>
+                    <span id="station-availability">Availability</span>
+                </div>
+            </div>
+            <div class="station-actions">
+                <button class="book-slot-btn" id="book-slot-btn">
+                    <i class="fas fa-calendar-plus"></i>
+                    Book Slot
+                </button>
+                <button class="directions-btn" id="directions-btn">
+                    <i class="fas fa-directions"></i>
+                    Get Directions
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading IntelliCharge...</p>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="booking-modal">
+        <div class="booking-modal-content">
+            <div class="booking-modal-header">
+                <h3 id="booking-station-name">Book Charging Slot</h3>
+                <button class="close-modal" id="close-booking-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="booking-modal-body">
+                <div class="booking-form">
+                    <div class="form-group">
+                        <label for="booking-date-time">Date & Time</label>
+                        <input type="datetime-local" id="booking-date-time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="booking-duration">Charging Duration</label>
+                        <select id="booking-duration" required>
+                            <option value="">Select duration</option>
+                            <option value="30">30 minutes</option>
+                            <option value="60">1 hour</option>
+                            <option value="90">1.5 hours</option>
+                            <option value="120">2 hours</option>
+                            <option value="180">3 hours</option>
+                            <option value="240">4 hours</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="booking-vehicle">Vehicle Type</label>
+                        <select id="booking-vehicle" required>
+                            <option value="">Select vehicle</option>
+                            <option value="tesla">Tesla</option>
+                            <option value="nissan">Nissan Leaf</option>
+                            <option value="chevrolet">Chevrolet Bolt</option>
+                            <option value="bmw">BMW i3</option>
+                            <option value="audi">Audi e-tron</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="price-estimate">
+                        <h4>Price Estimate</h4>
+                        <div class="price-breakdown">
+                            <div class="price-row">
+                                <span>Charging Cost:</span>
+                                <span id="charging-cost">$0.00</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Service Fee:</span>
+                                <span id="service-fee">$0.00</span>
+                            </div>
+                            <div class="price-row total">
+                                <span>Total:</span>
+                                <span id="total-price">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="booking-modal-footer">
+                <button class="btn btn-secondary" id="cancel-booking">Cancel</button>
+                <button class="btn btn-primary" id="confirm-booking">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Animation Overlay -->
+    <div id="success-overlay" class="success-overlay">
+        <div class="success-content">
+            <div class="success-checkmark">
+                <div class="check-icon">
+                    <span class="icon-line line-tip"></span>
+                    <span class="icon-line line-long"></span>
+                    <div class="icon-circle"></div>
+                    <div class="icon-fix"></div>
+                </div>
+            </div>
+            <h3>Booking Confirmed!</h3>
+            <p>Your charging slot has been successfully booked.</p>
+            <button class="btn btn-primary" id="close-success">Continue</button>
+        </div>
+    </div>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    <script src="script.js"></script>
+</body>
+</html>

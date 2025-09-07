@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>IntelliCharge - Book Charging Slot</title>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="styles.css">
+	<style>
+		.booking-wrap { max-width: 720px; margin: 2rem auto; padding: 1.5rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); }
+		.booking-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+		.booking-header .title { display:flex; align-items:center; gap:.75rem; }
+		.booking-header .title i { color: var(--primary-color); }
+		.form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+		.form .full { grid-column: 1 / -1; }
+		.form label { font-weight: 600; font-size:.9rem; color: var(--text-primary); }
+		.form input, .form select, .form output { width:100%; padding:.75rem; border:1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-secondary); }
+		.summary { margin-top:1rem; padding:1rem; background: var(--bg-secondary); border:1px solid var(--border-color); border-radius: var(--radius-md); }
+		.actions { margin-top:1rem; display:flex; gap:.75rem; justify-content:flex-end; }
+		.btn { padding:.75rem 1.25rem; border:none; border-radius: var(--radius-md); cursor:pointer; font-weight:600; }
+		.btn-primary { background: var(--primary-color); color:#fff; }
+		.btn-primary:hover { background: var(--primary-dark); }
+		.btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border:1px solid var(--border-color); }
+		.success-toast { position: fixed; top: 2rem; right: 2rem; background: var(--success-color); color:#fff; padding:1rem 1.25rem; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display:none; z-index:3000; }
+		.badge { padding:.25rem .5rem; border-radius: var(--radius-sm); background: var(--bg-tertiary); font-size:.75rem; color: var(--text-secondary); }
+		@media (max-width:768px){ .form { grid-template-columns: 1fr; } }
+	</style>
+</head>
+<body>
+	<header class="header">
+		<div class="header-content">
+			<div class="logo">
+				<i class="fas fa-bolt"></i>
+				<h1>IntelliCharge</h1>
+			</div>
+			<nav class="nav">
+				<a class="nav-btn" href="index.html"><i class="fas fa-arrow-left"></i> Back</a>
+			</nav>
+		</div>
+	</header>
+
+	<main class="main-content">
+		<div class="booking-wrap">
+			<div class="booking-header">
+				<div class="title">
+					<i class="fas fa-calendar-plus"></i>
+					<h2>Book Charging Slot</h2>
+				</div>
+				<span class="badge" id="station-badge">Loading...</span>
+			</div>
+
+			<form id="booking-form" class="form">
+				<div class="full">
+					<label>Station</label>
+					<input id="station-name-input" type="text" readonly>
+				</div>
+				<div>
+					<label for="datetime">Date & Time</label>
+					<input id="datetime" type="datetime-local" required>
+				</div>
+				<div>
+					<label for="duration">Duration</label>
+					<select id="duration" required>
+						<option value="30">30 minutes</option>
+						<option value="60">1 hour</option>
+						<option value="90">1.5 hours</option>
+						<option value="120">2 hours</option>
+						<option value="180">3 hours</option>
+						<option value="240">4 hours</option>
+					</select>
+				</div>
+				<div>
+					<label>Price per kWh</label>
+					<input id="price-per-kwh" type="number" step="0.01" min="0" required>
+				</div>
+				<div>
+					<label>Estimated Price</label>
+					<output id="price-estimate">$0.00</output>
+				</div>
+				<div>
+					<label for="vehicle">Vehicle</label>
+					<select id="vehicle" required>
+						<option value="tesla">Tesla</option>
+						<option value="nissan">Nissan Leaf</option>
+						<option value="chevrolet">Chevrolet Bolt</option>
+						<option value="bmw">BMW i3</option>
+						<option value="audi">Audi e-tron</option>
+						<option value="other">Other</option>
+					</select>
+				</div>
+				<div class="full summary">
+					<div style="display:flex; justify-content:space-between;">
+						<span>Charging window</span>
+						<strong id="summary-window">-</strong>
+					</div>
+					<div style="display:flex; justify-content:space-between; margin-top:.5rem;">
+						<span>Total</span>
+						<strong id="summary-total">$0.00</strong>
+					</div>
+				</div>
+				<div class="full actions">
+					<button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">Cancel</button>
+					<button id="confirm" type="submit" class="btn btn-primary">Confirm Booking</button>
+				</div>
+			</form>
+		</div>
+	</main>
+
+	<div id="success-toast" class="success-toast">
+		<i class="fas fa-check-circle"></i>
+		<span style="margin-left:.5rem;">Slot booked successfully!</span>
+	</div>
+
+	<script src="booking.js"></script>
+</body>
+</html>
+
